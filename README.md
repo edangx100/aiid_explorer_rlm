@@ -29,7 +29,7 @@ pinned: false
 | Problem | Symptom | How this project solves it |
 |---|---|---|
 | **Context rot** | Over many search rounds the agent's context fills with stale tool output and it forgets its goal, repeats work, and degrades. | The agent keeps its working notes in a separate scratchpad (a Python workspace) instead of letting them pile up in its memory. Each round it pulls back only a short summary of what it's found so far, so its attention stays focused. |
-| **Query narrowing** | Left alone, the agent re-issues near-identical searches and tunnels on one or two ATLAS techniques, leaving the rest of the threat surface blind. | The app spots when the agent keeps searching the same themes, then points it toward the threat types and industries it hasn't looked at yet — so it covers the wider landscape instead of circling a few corners. |
+| **Query narrowing** | Left alone, the agent re-issues near-identical searches and tunnels on one or two recurring themes, leaving the rest of the threat surface blind. | The app spots when the agent keeps searching the same themes, then points it toward the threat types and industries it hasn't looked at yet — so it covers the wider landscape instead of circling a few corners. |
 
 As a use case, AI Incident Explorer answers questions like — *"What MITRE ATLAS techniques are being used against LLMs in finance/healthcare/consumer products right now?"* — by autonomously searching the public record of AI incidents over many rounds and returning a structured, technique-tagged, severity-rated result set.
 
