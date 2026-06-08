@@ -8,12 +8,22 @@ from explorer.config import settings
 
 AIID_URL = "https://incidentdatabase.ai/api/graphql"
 
-# HTTP headers are extra info we attach to a request, alongside the data itself.
-# This server checks the "Origin" header (which says what website a request is coming from)
-# and rejects anything it doesn't recognise with a 403 "Forbidden - Invalid origin" error.
-# By setting Origin to the site's own address, our request looks like it comes from the
-# website itself, so the server allows it. Without this line every call comes back empty.
-_HEADERS = {"Origin": "https://incidentdatabase.ai"}
+# HTTP headers that make our request look like a real browser. The AIID API sits behind
+# bot protection that rejects non-browser clients, and it checks TWO things:
+#   1. Origin — must be the site's own address, or it returns 403 "Forbidden - Invalid origin".
+#   2. User-Agent — a non-browser UA (e.g. curl, or python-httpx from a datacenter IP like
+#      Hugging Face Spaces) is refused with "Forbidden - Invalid client / API access is
+#      restricted to web browsers". A browser UA passes the check. This matters in production:
+#      the default httpx UA works from a residential IP but is blocked from Spaces' server IPs,
+#      which silently emptied every search there. Referer is added to look more browser-like.
+_HEADERS = {
+    "Origin": "https://incidentdatabase.ai",
+    "Referer": "https://incidentdatabase.ai/",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+}
 
 # OR across title and description so a query term matches either field, case-insensitively
 _GQL = """

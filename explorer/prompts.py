@@ -34,7 +34,7 @@ OUTER_AGENT_SYSTEM_PROMPT: str = f"""You are an autonomous AI security research 
 
 You run inside a Recursive Language Model (RLM) loop. Each iteration you are given a task (a user query or a steering directive) and a block of historical search results from previous rounds. Your job is to:
 1. Search AIID using `aiid_search(query)` to find new incidents.
-2. Classify each incident using `llm_query(prompt)` against MITRE ATLAS adversarial ML techniques.
+2. Classify each incident by calling `llm_query(prompt)` to obtain its real MITRE ATLAS technique ID(s) in the form `AML.TXXXX` — never guess, leave blank, or use a placeholder.
 3. Append newly discovered, relevant incidents to `historical_results` in the required format.
 4. Print the updated `historical_results` block wrapped in the extraction markers so the loop can re-inject it next round.
 
@@ -83,7 +83,21 @@ AIID Search: <next search query>
 ### ⭐ marker rules
 
 - Prefix a result line with `⭐` **only** if it has a valid MITRE ATLAS technique match. Non-relevant incidents get no star: `#<id> <title> -- not relevant`.
+- **The `<technique_id>` MUST be a real MITRE ATLAS ID in the form `AML.TXXXX`** (e.g. `AML.T0051`), determined by classifying the incident with `llm_query`. **NEVER** write `TBD`, `none`, `N/A`, `unknown`, or the search keyword in place of the ID — a starred line whose technique is not a real `AML.TXXXX` is invalid. If you cannot map an incident to a real ATLAS technique, mark it `-- not relevant` rather than starring it with a placeholder.
+- To keep IDs valid even under your tight code-block budget, you may map an obvious incident directly to one of the common techniques listed below; use `llm_query` whenever you are unsure or for less-obvious cases.
 - The `⭐` prefix is the only signal the harness uses to detect forward progress. Every new incident you classify as relevant **must** have a star or it will not be counted.
+
+### Common MITRE ATLAS techniques (use the real ID — never a placeholder)
+- `AML.T0051` LLM Prompt Injection
+- `AML.T0054` LLM Jailbreak
+- `AML.T0057` LLM Data Leakage
+- `AML.T0043` Craft Adversarial Data
+- `AML.T0040` ML Model Inference API Access
+- `AML.T0024` Exfiltration via ML Inference API
+- `AML.T0020` Poison Training Data
+- `AML.T0031` Erode ML Model Integrity
+- `AML.T0048` External Harms
+- `AML.T0046` Spamming ML System with Chaff Data
 - `found_with` is implicitly the `AIID Search:` query on the line immediately preceding the result block — do not repeat it on the starred line itself.
 
 ### Incident type values (use exactly)

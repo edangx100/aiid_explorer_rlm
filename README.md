@@ -1,5 +1,5 @@
 ---
-title: AI Incident Explorer
+title: aiid-explorer
 emoji: 🛡️
 colorFrom: indigo
 colorTo: red
@@ -98,11 +98,23 @@ With all of those pieces working together, here's what it looks like to the user
 
 ### On Hugging Face Spaces (no install)
 
-1. Type a short keyword in **Query** (one or two words works best).
-2. Click **Search** and watch the status banner — a live round takes ~1.5–3 minutes.
-3. Use the **type** and **severity** filters to slice the results.
+**▶ [Open the live demo](https://huggingface.co/spaces/edangx100/aiid-explorer)**
 
-> A live search calls a real LLM, so it is not instant. If the backend is unavailable the app falls back to bundled demo data so the table is never blank.
+1. Type a short keyword in **Query** (one or two words works best).
+2. Click **Search** and **leave the tab open** — a round can take **up to ~9 minutes** on the free
+   Basic-CPU Space. The status banner shows live progress and a time estimate.
+3. Use the **type** and **severity** filters to slice the results once they arrive.
+
+> If the backend is unavailable the app falls back to bundled demo data so the table is never blank.
+
+#### Why the search takes minutes, not seconds
+
+It's an autonomous agent, not a database query. Each round the outer agent runs several AIID
+searches and then calls the **inner LLM-as-a-Judge once per candidate incident** to classify it
+against MITRE ATLAS — a dozen-plus model calls that run **sequentially**, each blocking on remote
+OpenRouter latency (plus occasional retries). The free **Basic CPU** tier (2 vCPU, no GPU) runs the
+agent orchestration and sandboxed REPL with no parallelism, and a sleeping Space adds ~30s to wake.
+Keeping **Max rounds = 1** (the default) is the fastest way to try it.
 
 ### Running it locally
 

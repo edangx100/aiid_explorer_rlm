@@ -26,7 +26,7 @@ wheels = [
 ]
 
 [[package]]
-name = "aiid-explorer-v0"
+name = "aiid-explorer-rlm"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

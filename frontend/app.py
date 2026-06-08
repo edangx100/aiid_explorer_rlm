@@ -96,11 +96,12 @@ STATUS_CSS = """
 @keyframes status-spin { to { transform: rotate(360deg); } }
 """
 
-# Rough per-round timing used only to set the user's expectation. A live round runs
-# an AI agent plus several AIID searches; measured runs land around 1.5–3 minutes
-# each, so we show that range multiplied by the number of rounds requested.
-SECONDS_PER_ROUND_LOW = 90
-SECONDS_PER_ROUND_HIGH = 180
+# Rough per-round timing used only to set the user's expectation. A live round runs an
+# AI agent plus several AIID searches and one inner-LLM classification per candidate
+# incident — many sequential model round-trips. On the free HF Spaces Basic-CPU tier a
+# round lands around 3–9 minutes; we show that range multiplied by the rounds requested.
+SECONDS_PER_ROUND_LOW = 180
+SECONDS_PER_ROUND_HIGH = 540
 
 
 def _status_html(text: str, state: str, hint: str | None = None) -> str:

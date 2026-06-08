@@ -48,19 +48,33 @@ def _extract_search_query(code: str) -> str:
 
 
 def _extract_block(agent_output: str) -> str:
-    """Return the text between the HISTORICAL_RESULTS markers, or "" if absent.
+    """Return the accumulated results block from the agent output, or "" if none.
 
-    The outer agent prints its accumulated results wrapped in
+    The outer agent is asked to print its results wrapped in
     HISTORICAL_RESULTS_START / HISTORICAL_RESULTS_END. It may print more than once in a
     run, so we take the LAST block (rfind = search from the end) — that is the most
-    up-to-date version. When the validator gave up and printed no markers, we get "".
+    up-to-date version.
+
+    Fallback for marker-less output: some models (observed with minimax/minimax-m3)
+    print the ⭐ result lines but substitute their own separator for the required
+    markers. Without a fallback every such round is discarded and the run ends with
+    "0 incidents found" even though the agent classified incidents. So when the markers
+    are absent we salvage the self-identifying lines — the `AIID Search:` headers (which
+    set found_with) and every ⭐ line — which is exactly what parse_to_df() and
+    _extract_found_with() consume. Returns "" only when there are genuinely no ⭐ lines.
     """
     start = agent_output.rfind(HISTORICAL_RESULTS_START)
     end = agent_output.rfind(HISTORICAL_RESULTS_END)
-    if start == -1 or end == -1 or end < start:
-        return ""
-    # Slice out just the inner block (skip past the START marker text itself).
-    return agent_output[start + len(HISTORICAL_RESULTS_START):end].strip()
+    if start != -1 and end != -1 and end >= start:
+        # Slice out just the inner block (skip past the START marker text itself).
+        return agent_output[start + len(HISTORICAL_RESULTS_START):end].strip()
+
+    salvaged = [
+        line.rstrip()
+        for line in agent_output.splitlines()
+        if line.strip().startswith("AIID Search:") or "⭐" in line
+    ]
+    return "\n".join(salvaged).strip()
 
 
 def _count_stars(block: str) -> int:

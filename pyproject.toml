@@ -1,5 +1,5 @@
 [project]
-name = "aiid-explorer-v0"
+name = "aiid-explorer-rlm"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.11"
