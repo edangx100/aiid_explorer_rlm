@@ -1,0 +1,29 @@
+[project]
+name = "aiid-explorer-v0"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "braintrust>=0.24.0",
+    "gensim>=4.4.0",
+    "gradio>=6.16.0",
+    "httpx>=0.28.1",
+    "pandas>=3.0.3",
+    "pydantic-ai>=1.106.0",
+    "pydantic-ai-harness[code-mode]>=0.3.0",
+    "pydantic-settings>=2.14.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.pytest.ini_options]
+# Only collect tests from tests/ — references/ scripts execute live agent code at module level.
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "integration: hits live external APIs; skipped by default, run with --integration",
+]
