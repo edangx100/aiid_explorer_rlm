@@ -31,6 +31,8 @@ pinned: false
 | **Context rot** | Over many search rounds the agent's context fills with stale tool output and it forgets its goal, repeats work, and degrades. | The agent keeps its working notes in a separate scratchpad (a Python workspace) instead of letting them pile up in its memory. Each round it pulls back only a short summary of what it's found so far, so its attention stays focused. |
 | **Query narrowing** | Left alone, the agent re-issues near-identical searches and tunnels on one or two recurring themes, leaving the rest of the threat surface blind. | The app spots when the agent keeps searching the same themes, then points it toward the threat types and industries it hasn't looked at yet — so it covers the wider landscape instead of circling a few corners. |
 
+  ![LDA topic steering widens coverage by nudging the agent toward unexplored themes](images/widen_coverage.png)
+
 As a use case, AI Incident Explorer answers questions like — *"What MITRE ATLAS techniques are being used against LLMs in finance/healthcare/consumer products right now?"* — by autonomously searching the public record of AI incidents over many rounds and returning a structured, technique-tagged, severity-rated result set.
 
 Under the hood it is an **RLM agent**: an outer agent writes and runs Python in a sandboxed REPL to search and triage — keeping state in the REPL rather than the prompt (the context-rot fix) — while an inner **LLM-as-a-Judge** agent classifies each incident against the MITRE ATLAS taxonomy. After seeding rounds, an **LDA** model clusters the agent's own past searches and steers it toward unexplored techniques (the query-narrowing fix).
@@ -65,8 +67,6 @@ Everything it finds shows up in a sortable table. Click any incident's **title**
 
 - **LLM-as-a-Judge classifier.** A second inner LLM agent acts as a reviewer that the app can call on for each incident. For every case it reads, it hands back the relevant ATLAS technique IDs and a triage category (how the incident should be sorted). This reviewer is set up separately from the main app, so you can drop in a cheaper or faster model for the job without changing anything else.
 - **LDA topic steering.** Once a few rounds have run, the app looks back at the agent's own past search terms and groups them into recurring themes (using gensim's LDA topic modeling). Seeing which themes the agent keeps circling, it then nudges the next search toward the areas it hasn't explored yet — so coverage keeps widening instead of tunneling on the same few topics.
-
-  ![LDA topic steering widens coverage by nudging the agent toward unexplored themes](images/widen_coverage.png)
 
 ---
 
