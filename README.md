@@ -106,7 +106,7 @@ With all of those pieces working together, here's what it looks like to the user
 
 **▶ [Open the live demo](https://huggingface.co/spaces/edangx100/aiid-explorer)**
 
-1. Type a short keyword in **Query** (one or two words works best).
+1. Type a short keyword in **Query**.
 2. Click **Search** and **leave the tab open** — a round can take **up to ~9 minutes** on the HuggingFace
    Basic-CPU Space. The status banner shows live progress and a time estimate.
 3. Use the **type** and **severity** filters to slice the results once they arrive.
