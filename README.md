@@ -12,13 +12,13 @@ pinned: false
 
 # AI Incident Explorer
 
-> An autonomous agentic tool that continuously mines the [AI Incident Database (AIID)](https://incidentdatabase.ai) to surface, classify, and triage real-world AI failures and attacks — mapping each one to **MITRE ATLAS** adversarial-ML techniques via an **LLM-as-a-Judge** classifier, with **full agent observability**.
+> An autonomous agentic tool that mines the [AI Incident Database (AIID)](https://incidentdatabase.ai) to surface, classify, and triage real-world AI failures and attacks — mapping each one to **MITRE ATLAS** adversarial-ML techniques via an **LLM-as-a-Judge** classifier, with **agent observability**.
 
 ---
 
 ## Why This Project Exists
 
-**Agents that run over a long horizon predictably hit two failure modes:** **context rot** (their context fills with stale tool output until they forget the goal and degrade) and **query narrowing** (they tunnel on a few lines of inquiry and go blind to the rest of the problem space). 
+**Agents operating over long horizons can degrade in two predictable ways**: Long‑horizon agents can experience **context rot**, and those engaged in long agentic search may additionally drift into **query narrowing** .
 
 **This project is a demonstration of how both can be addressed — context rot with a [Recursive Language Model (RLM)](https://arxiv.org/html/2512.24601v3) architecture, and query narrowing with [LDA](https://www.ibm.com/think/topics/topic-modeling)-based topic steering** — using **AI Incident Explorer** as the use case.
 
@@ -28,21 +28,27 @@ pinned: false
 
 | Problem | Symptom | How this project solves it |
 |---|---|---|
-| **Context rot** | Over many search rounds the agent's context fills with stale tool output and it forgets its goal, repeats work, and degrades. | The agent keeps its working notes in a separate scratchpad (a Python workspace) instead of letting them pile up in its memory. Each round it pulls back only a short summary of what it's found so far, so its attention stays focused. |
+| **Context rot** | Over many search rounds the agent's context fills with stale tool output and it forgets its goal, repeats work, and degrades. | RLM avoids putting all context into the prompt. Instead, it keeps the full context in a Python REPL workspace, where the model can search, filter, split, and process only the parts it needs. For large or complex sections, it calls smaller helper LMs on selected chunks, then combines their findings. This keeps each model call focused instead of relying on one overloaded conversation history. |
 | **Query narrowing** | Left alone, the agent re-issues near-identical searches and tunnels on one or two recurring themes, leaving the rest of the threat surface blind. | The app spots when the agent keeps searching the same themes, then points it toward the threat types and industries it hasn't looked at yet — so it covers the wider landscape instead of circling a few corners. |
 
   ![LDA topic steering widens coverage by nudging the agent toward unexplored themes](images/widen_coverage.png)
 
-As a use case, AI Incident Explorer answers questions like — *"What MITRE ATLAS techniques are being used against LLMs in finance/healthcare/consumer products right now?"* — by autonomously searching the public record of AI incidents over many rounds and returning a structured, technique-tagged, severity-rated result set.
+As a use case, AI Incident Explorer answers questions like — *“What MITRE ATLAS techniques are being used against LLMs in finance, healthcare, or consumer products right now?”* — by taking a user query as the starting point, searching [AI Incident Database (AIID)](https://incidentdatabase.ai), and returning a structured result set tagged by technique and severity.
 
-Under the hood it is an **RLM agent**: an outer agent writes and runs Python in a sandboxed REPL to search and triage — keeping state in the REPL rather than the prompt (the context-rot fix) — while an inner **LLM-as-a-Judge** agent classifies each incident against the MITRE ATLAS taxonomy. After seeding rounds, an **LDA** model clusters the agent's own past searches and steers it toward unexplored techniques (the query-narrowing fix).
+Under the hood of AI Incident Explorer: 
+- an outer agent writes and runs Python in a sandboxed REPL to search and triage — keeping state in the REPL rather than the prompt (the context-rot fix)
+- while an inner **LLM-as-a-Judge** agent classifies each incident against the MITRE ATLAS taxonomy.  
+- After the initial seeding rounds, an **LDA** model within the search-loop orchestrator clusters the agent’s previous searches and steers it toward unexplored techniques to improve query narrowing.
 
 ---
 
 ## What AI Incident Explorer does
 
-- **Autonomous, multi-round search** — give it one natural-language query; it runs up to *N* search/triage rounds on its own. One search only scratches the surface: the incidents are scattered under many different wordings, so a single query misses most of them. Each round lets the agent learn from what it just found and follow up with sharper, broader searches — building a fuller picture than any one-shot lookup could.
-- **MITRE ATLAS classification** — every relevant incident is tagged with one or more adversarial-ML technique IDs (e.g. `AML.T0051` LLM Prompt Injection, `AML.T0043` deepfakes, `AML.T0047` model evasion).
+- **Autonomous, multi-round search** — give it one natural-language query; it runs up to *N* search/triage rounds on its own. One search scratches the surface: the incidents are scattered under many different wordings, so a single query misses most of them. Each round lets the agent learn from what it just found and avoid re-treading it; once topic steering kicks in (round 5 by default), the loop actively steers searches toward themes it hasn't explored yet — building a fuller picture than any one-shot lookup could.
+
+  **Example.** You type *"prompt injection in healthcare"*. The agent doesn't search that whole phrase — the database looks for keywords inside incident text, so it splits your words into short searches like `prompt injection`, `healthcare`. The first few rounds stay close to your words and remember what they've already found. Then the agent notices it keeps searching the same two ideas, so it tries new ones it hasn't looked at yet — a different kind of attack (like `data leakage`) or a related area (like `medical imaging` or `pharmacy`). This way it covers far more ground than searching once.
+
+- **MITRE ATLAS classification** — every relevant incident is tagged with one or more ATLAS technique IDs (e.g. `AML.T0051` LLM Prompt Injection, `AML.T0054` LLM Jailbreak, `AML.T0015` Evade AI Model).
 - **LLM-as-a-Judge triage** — an inner agent decides *security attack vs. safety failure vs. reliability issue* and assigns a harm-severity rating.
 
 Everything it finds shows up in a sortable table. Click any incident's **title** to open its full write-up on the AI Incident Database, and use the type and severity filters to focus on just the cases you care about.
@@ -72,7 +78,7 @@ Everything it finds shows up in a sortable table. Click any incident's **title**
 
 ## What the User Sees
 
-With all of those pieces working together, here's what it looks like to the user in the Gradio interface — note the MITRE ATLAS classifications shown along the bottom of the table:
+With all of those pieces working together, here's what it looks like to the user in the Gradio interface — note the MITRE ATLAS classifications shown along the bottom of the table (within red-dotted box):
 
 ![ATLAS-tagged results with type + severity filters applied](images/atlas-filters.png)
 

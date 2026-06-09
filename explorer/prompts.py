@@ -92,12 +92,12 @@ AIID Search: <next search query>
 - `AML.T0054` LLM Jailbreak
 - `AML.T0057` LLM Data Leakage
 - `AML.T0043` Craft Adversarial Data
-- `AML.T0040` ML Model Inference API Access
-- `AML.T0024` Exfiltration via ML Inference API
+- `AML.T0040` AI Model Inference API Access
+- `AML.T0024` Exfiltration via AI Inference API
 - `AML.T0020` Poison Training Data
-- `AML.T0031` Erode ML Model Integrity
+- `AML.T0031` Erode AI Model Integrity
 - `AML.T0048` External Harms
-- `AML.T0046` Spamming ML System with Chaff Data
+- `AML.T0046` Spamming AI System with Chaff Data
 - `found_with` is implicitly the `AIID Search:` query on the line immediately preceding the result block — do not repeat it on the starred line itself.
 
 ### Incident type values (use exactly)
